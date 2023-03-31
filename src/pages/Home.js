@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import axios from "axios";
+import Sentiment from 'sentiment';
 
 
 const Home = () => {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false);
-  const [summarize, setsummarize] = useState('');
+  const [summarize, setsummarize] = useState('')
+  const [Score, setScore] = useState(null);
 
   const [synth, setSynth] = useState(window.speechSynthesis);
   const [voice, setVoice] = useState(null);
-
+  const sentiment = new Sentiment();
 
   const createSummarizeParams = (text, numSentences) => {
     const params = {
@@ -35,13 +37,16 @@ const Home = () => {
 
     axios.request(options).then(function (response) {
       setsummarize(response.data.summary)
-      setLoading(false)
+      const result = sentiment.analyze(response.data.summary);
+      setScore(result.score)
+      setLoading(false);
     }).catch(function (error) {
       console.error(error);
     });
+
+
   }
 
-  
 
   const handleVoiceChange = (event) => {
     const selectedVoice = synth.getVoices()[event.target.value];
@@ -93,10 +98,7 @@ const Home = () => {
                 }
               </div>
 
-              <div className='mt-10'>
-
-                {
-                  summarize !== '' ? <>
+              <div className={`${loading ? 'hidden' : ''}`} id='showSummary'>
                     <h2 className='text-2xl font-bold mb-2'> Summarized Text</h2>
                     <select className='appearance-none bg-gray-100 border rounded p-2 text-gray-700 mr-2' onChange={handleVoiceChange}>
                       {synth && synth.getVoices().map((voice, index) => (
@@ -105,14 +107,32 @@ const Home = () => {
                         </option>
                       ))}
                     </select>
-                    
-                    <button className='bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded' onClick={handleSpeak}>Speak</button>
-                    
-                    <button className='ml-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded' onClick={handleStop}>Stop</button>
-                    <p className='text-justify mt-2'>{summarize}</p>
-                  </>
-                    : ''
-                }
+
+                    <button className='bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded' onClick={handleSpeak}>Speak</button>
+
+                    <button className='ml-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded' onClick={handleStop}>Stop</button>
+                    <p className='text-justify mt-2 mb-5'>{summarize}</p>
+                    <hr></hr>
+                    <h1 className='mt-5 font-bold text-center text-3xl'>Sentiment Score: {Score}</h1>
+                    <div className='flex flex-row gap-[20px] justify-center p-5'>
+                     {
+                      Score > 0 ? <div className='flex justify-center items-center relative'> 
+                        <img src='./happy.gif' className='w-28' alt="Positive" />
+                        <p className='absolute -bottom-5'>Positive</p>
+                      </div> :
+                      Score === 0 ? <div className='flex justify-center items-center relative'> 
+                      <img src='./neutral.gif' className='w-28' alt="Neutral" />
+                      <p className='absolute -bottom-5'>Neutral</p>
+                    </div> : 
+                      Score < 0 ? <div className='flex justify-center items-center relative'> 
+                      <img src='./sad.gif' className='w-28' alt="sad" />
+                      <p className='absolute -bottom-5'>Negative</p>
+                    </div> :
+                      <p className='text-red-500'>Something Went Wrong</p>
+                     }
+                    </div>
+            
+
               </div>
             </div>
           </div>
