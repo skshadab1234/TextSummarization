@@ -62,12 +62,7 @@ export default function Header() {
                                 </Link>
                             </li>
                             <li className="text-gray-600 hover:text-blue-600">
-                                <Link to="/TextSentimentAnalaysis">
-                                    Text Sentiment
-                                </Link>
-                            </li>
-                            <li className="text-gray-600 hover:text-blue-600">
-                                <Link to="/imageSentimentAnalysis">
+                                <Link to="/ImageAnalysis">
                                     Image Sentiment
                                 </Link>
                             </li>

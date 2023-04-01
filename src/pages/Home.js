@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import axios from "axios";
 import Sentiment from 'sentiment';
-
+import { countWords } from '../utils';
 
 const Home = () => {
   const [text, setText] = useState('')
@@ -23,6 +23,7 @@ const Home = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    document.getElementById('showSummary').classList.add('hidden')
     setLoading(true)
     const options = {
       method: 'POST',
@@ -32,14 +33,16 @@ const Home = () => {
         'X-RapidAPI-Key': '8e26854509msh49a75b197e64648p140485jsn9d4e00fb2be9',
         'X-RapidAPI-Host': 'gpt-summarization.p.rapidapi.com'
       },
-      data: createSummarizeParams(text, 5)
+      data: createSummarizeParams(text, 10)
     };
-
+    
     axios.request(options).then(function (response) {
       setsummarize(response.data.summary)
       const result = sentiment.analyze(response.data.summary);
       setScore(result.score)
       setLoading(false);
+      document.getElementById('showSummary').classList.remove('hidden')
+      
     }).catch(function (error) {
       console.error(error);
     });
@@ -65,6 +68,7 @@ const Home = () => {
     synth.cancel();
   };
 
+  console.log(countWords(text))
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -79,26 +83,37 @@ const Home = () => {
           <div className="w-full max-w-3xl rounded-lg shadow-lg">
             <div className="bg-white rounded-lg px-4 py-4 sm:p-6">
               <div className="flex flex-col">
-                <label for="textMessage" className="leading-7 font-medium text-gray-900">Paste your text</label>
+                <div className='flex flex-row justify-between'>
+                  <div>
+                    <label for="textMessage" className="leading-7 font-medium text-gray-900">Paste your text</label>  
+                  </div>
+                  <div>
+                    <h3>Words Entered : {countWords(text)}</h3>
+                  </div>
+                </div>
                 <textarea
                   rows={14}
                   cols={80}
-                  placeholder="Put your text"
+                  placeholder="Please note: A minimum of 200 words are allowed for this section."
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   className="form-textarea mt-2 border-2 p-2"
                 />
               </div>
+              <div>
+
+              </div>
               <div className="flex justify-end mt-4">
                 {
-                  loading ? 'Loading' :
-                    <button type="button" className={`${text === '' ? "hidden" : ''} bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded`} onClick={handleSubmit}>
+                  countWords(text) > 200 ? 
+                  loading ? <p className='text-sm animate-pulse  block flex mb-4' > <img src='./loader.gif' width={'100px'} className="relative bottom-7" />Please wait while we summarize your longer text into a shorter, more concise version. This may take a few moments, but we promise it will be worth it!....... </p> :
+                    <button type="button" className={` 'hidden'} bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded`} onClick={handleSubmit}>
                       Summarize
-                    </button>
+                    </button> : ''
                 }
               </div>
 
-              <div className={`${loading ? 'hidden' : ''}`} id='showSummary'>
+              <div className={`hidden`} id='showSummary'>
                     <h2 className='text-2xl font-bold mb-2'> Summarized Text</h2>
                     <select className='appearance-none bg-gray-100 border rounded p-2 text-gray-700 mr-2' onChange={handleVoiceChange}>
                       {synth && synth.getVoices().map((voice, index) => (
@@ -111,7 +126,7 @@ const Home = () => {
                     <button className='bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded' onClick={handleSpeak}>Speak</button>
 
                     <button className='ml-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded' onClick={handleStop}>Stop</button>
-                    <p className='text-justify mt-2 mb-5'>{summarize}</p>
+                    <p className='text-justify mt-5 mb-5'>{summarize}</p>
                     <hr></hr>
                     <h1 className='mt-5 font-bold text-center text-3xl'>Sentiment Score: {Score}</h1>
                     <div className='flex flex-row gap-[20px] justify-center p-5'>
