@@ -13,10 +13,11 @@ const Home = () => {
   const [voice, setVoice] = useState(null);
   const sentiment = new Sentiment();
 
-  const createSummarizeParams = (text, numSentences) => {
+  const createSummarizeParams = (text, numSentences, language) => {
     const params = {
       text,
-      num_sentences: numSentences
+      num_sentences: numSentences,
+      language
     };
     return JSON.stringify(params);
   };
@@ -33,7 +34,7 @@ const Home = () => {
         'X-RapidAPI-Key': '8e26854509msh49a75b197e64648p140485jsn9d4e00fb2be9',
         'X-RapidAPI-Host': 'gpt-summarization.p.rapidapi.com'
       },
-      data: createSummarizeParams(text, 10)
+      data: createSummarizeParams(text, 10, 'hi')
     };
     
     axios.request(options).then(function (response) {
@@ -45,6 +46,7 @@ const Home = () => {
       
     }).catch(function (error) {
       console.error(error);
+      setLoading(false)
     });
 
 
@@ -68,13 +70,13 @@ const Home = () => {
     synth.cancel();
   };
 
-  console.log(countWords(text))
+  
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="lg:text-center">
-          <h2 className="text-base text-gray-400 font-semibold tracking-wide uppercase">Welcome to</h2>
-          <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-800 sm:text-4xl">
+          <h2 className="text-base text-gray-200 font-semibold tracking-wide uppercase">Welcome to</h2>
+          <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-4xl">
             Text Summarization
           </p>
         </div>
@@ -92,7 +94,7 @@ const Home = () => {
                   </div>
                 </div>
                 <textarea
-                  rows={14}
+                  rows={6}
                   cols={80}
                   placeholder="Please note: A minimum of 200 words are allowed for this section."
                   value={text}
@@ -100,7 +102,7 @@ const Home = () => {
                   className="form-textarea mt-2 border-2 p-2"
                 />
               </div>
-              <div>
+              <div> 
 
               </div>
               <div className="flex justify-end mt-4">

@@ -1,6 +1,6 @@
 import Header from "./components/Header";
 import { Route, Routes } from 'react-router-dom';
-import { Home, ImageAnalysis } from "./pages";
+import { Home, ImageAnalysis, Text } from "./pages";
 function App() {
   return (
     <div className="w-full">
@@ -10,6 +10,7 @@ function App() {
         <Routes>
           <Route path="/" exact element={<Home />} />
           <Route path="/ImageAnalysis" element={<ImageAnalysis />} />
+          <Route path="/Text" element={<Text />} />
         </Routes>
       </div>
     </div>

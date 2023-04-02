@@ -5,12 +5,12 @@ export default function Header() {
     const [navbar, setNavbar] = useState(false);
 
     return (
-        <nav className="w-full bg-white shadow">
-            <div className="justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
+        <nav className="w-full relative">
+            <div className="justify-between px-8 md:items-center md:flex">
                 <div>
                     <div className="flex items-center justify-between py-3 md:py-5 md:block">
                         <Link to="/">
-                                <h2 className="text-2xl font-bold">TEXT SUMMARIZARTION</h2>
+                                <h2 className="text-2xl text-white font-bold">TEXT SUMMARIZARTION</h2>
                         </Link>
                         <div className="md:hidden">
                             <button
@@ -56,14 +56,19 @@ export default function Header() {
                             }`}
                     >
                         <ul className="items-center justify-center space-y-8 md:flex md:space-x-6 md:space-y-0">
-                            <li className="text-gray-600 hover:text-blue-600">
+                            <li className="text-white hover:text-blue-600">
                                 <Link to="/">
                                     Home
                                 </Link>
                             </li>
-                            <li className="text-gray-600 hover:text-blue-600">
+                            <li className="text-white hover:text-blue-600">
                                 <Link to="/ImageAnalysis">
                                     Image Sentiment
+                                </Link>
+                            </li>
+                            <li className="text-white hover:text-blue-600">
+                                <Link to="/Text">
+                                    PDF Sentiment
                                 </Link>
                             </li>
 
@@ -71,6 +76,8 @@ export default function Header() {
                     </div>
                 </div>
             </div>
+
+            <div className="absolute bg-cover w-full top-0 -z-[1] bg-[url('https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80')] h-[600px] bg-no-repeat"></div>
         </nav>
     );
 }
