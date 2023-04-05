@@ -34,7 +34,7 @@ const Home = () => {
         'X-RapidAPI-Key': '8e26854509msh49a75b197e64648p140485jsn9d4e00fb2be9',
         'X-RapidAPI-Host': 'gpt-summarization.p.rapidapi.com'
       },
-      data: createSummarizeParams(text, 10, 'hi')
+      data: createSummarizeParams(text, 10)
     };
     
     axios.request(options).then(function (response) {

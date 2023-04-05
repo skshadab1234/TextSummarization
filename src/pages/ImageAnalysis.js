@@ -1,13 +1,22 @@
 import React, {useState} from 'react'
+import axios from "axios";
 import Tesseract from 'tesseract.js';
 import Sentiment from 'sentiment';
 
 const ImageAnalysis = () => {
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [summarize, setsummarize] = useState('')
   const [data, setSentiment] = useState([]);
   const [loading, setLoading] = useState('')
   const sentiment = new Sentiment();
+
+  const createSummarizeParams = (text, numSentences) => {
+    const params = {
+      text,
+      num_sentences: numSentences,
+    };
+    return JSON.stringify(params);
+  };
 
   const handleImageUpload = async (event) => {
     setLoading(true)
@@ -18,15 +27,32 @@ const ImageAnalysis = () => {
     let result, textWithIndent;
     if (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/webp') {
       result = await Tesseract.recognize(file, 'eng');
-      textWithIndent = result.data.text.replace(/\n/g, '\n    ');
+      textWithIndent = result.data.text.replace(/\n/g, '\n ');
+      const options = {
+        method: 'POST',
+        url: 'https://gpt-summarization.p.rapidapi.com/summarize',
+        headers: {
+          'content-type': 'application/json',
+          'X-RapidAPI-Key': '8e26854509msh49a75b197e64648p140485jsn9d4e00fb2be9',
+          'X-RapidAPI-Host': 'gpt-summarization.p.rapidapi.com'
+        },
+        data: createSummarizeParams(textWithIndent, 10)
+      };
+      
+      axios.request(options).then(function (response) {
+        setsummarize(response.data.summary)
+        const result = sentiment.analyze(response.data.summary);
+        setSentiment(result)
+        setLoading(false);
+        
+      }).catch(function (error) {
+        console.error(error);
+        setLoading(false)
+      });
     } else {
       setLoading(false);
       return alert('Unsupported file format!');
     }
-  
-    const resultSentiment = sentiment.analyze(textWithIndent)
-    setSentiment(resultSentiment)
-    setLoading(false)
   };
   
   return (
@@ -74,8 +100,8 @@ const ImageAnalysis = () => {
       {
         loading === '' ?  '' : loading ? <p className='text-sm animate-pulse  block flex relative top-[100px]' > <img src='./loader.gif' width={'100px'} className="relative bottom-7" />Please wait while we analyze your image to provide accurate output, more concise version. This may take a few moments, but we promise it will be worth it!....... </p> : 
        <div id="sentimentData" className='mt-[60px] h-[100vh]'>
-        <h1 className='text-2xl underline text-center mb-5 font-medium'> Generated Output:</h1>
-        <h1 className=' text-xl mb-4 whitespace-pre-wrap text-justify'>{data.tokens?.map(str => str.split('').join('')).join(' ')}</h1>
+        <h1 className='text-2xl underline text-center mb-5 font-medium'> Summarized Output:</h1>
+        <h1 className=' text-xl mb-4 whitespace-pre-wrap text-justify'>{summarize}</h1>
         <hr></hr>
           <h1 className='mt-5 font-bold text-center text-3xl'>Sentiment Score: {data.score}</h1>
           <div className='flex flex-row gap-[20px] justify-center p-5 '>

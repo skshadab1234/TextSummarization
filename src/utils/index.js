@@ -22,3 +22,4 @@ export const countWords = (str) => {
    // return the modified text
    return text.trim();
  }
+ 

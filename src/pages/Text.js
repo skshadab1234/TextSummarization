@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import Sentiment from 'sentiment';
+import axios from "axios";
 
 const Text = () => {
-    const [text, setText] = useState('')
     const [loading, setLoading] = useState('')
+    const [summarize, setsummarize] = useState('')
     const [sentimentData, setSentimentData] = useState([])
     const sentiment = new Sentiment();
+
+    const createSummarizeParams = (text, numSentences) => {
+        const params = {
+            text,
+            num_sentences: numSentences,
+        };
+        return JSON.stringify(params);
+    };
+
+
     const handleFileSelect = (event) => {
         setLoading(true)
         const file = event.target.files[0];
@@ -27,17 +38,39 @@ const Text = () => {
                 const normalText = response;
                 const convertedText = normalText.replace(/^\s+|\s+$/g, '');
                 const trimmeedText = convertedText.trim()
-                setText(trimmeedText)
-                const resultSentiment = sentiment.analyze(trimmeedText)
-                setSentimentData(resultSentiment)
-                setLoading(false)
-                console.log(sentimentData)
+
+                const options = {
+                    method: 'POST',
+                    url: 'https://gpt-summarization.p.rapidapi.com/summarize',
+                    headers: {
+                        'content-type': 'application/json',
+                        'X-RapidAPI-Key': '8e26854509msh49a75b197e64648p140485jsn9d4e00fb2be9',
+                        'X-RapidAPI-Host': 'gpt-summarization.p.rapidapi.com'
+                    },
+                    data: createSummarizeParams(trimmeedText, 10)
+                };
+
+                axios.request(options).then(function (response) {
+                    setsummarize(response.data.summary)
+                    const result = sentiment.analyze(response.data.summary);
+                    setSentimentData(result)
+                    setLoading(false);
+
+                }).catch(function (error) {
+                    console.error(error);
+                    setLoading(false)
+                });
+                // setText(trimmeedText)
+                // const resultSentiment = sentiment.analyze(trimmeedText)
+                // setSentimentData(resultSentiment)
+                // setLoading(false)
+                // console.log(sentimentData)
             })
             .catch(err => console.error(err));
     };
 
     return (
-       
+
         <div className='h-[800px]'>
             <div className="flex flex-col items-center justify-center h-[500px]">
                 <div className="bg-white p-8 rounded-lg shadow-md">
@@ -54,35 +87,35 @@ const Text = () => {
                 </div>
             </div>
             {
-                loading == '' ? '' : 
-                loading ? <p className='text-sm animate-pulse text-white block flex  z-[999]' > 
+                loading === '' ? '' :
+                    loading ? <p className='text-sm animate-pulse text-white block flex  z-[999]' >
                         <img src='./loader.gif' width={'100px'} className="relative bottom-7" />
-                            Please wait while we analyze your pdf to provide accurate output, more concise version. This may take a few moments, but we promise it will be worth it!....... 
-                        </p> 
-                :
-                    <div id="sentimentData" className='mt-[50px] h-[100vh]'>
-                        <h1 className='text-2xl underline text-center mb-5 font-medium'> Generated Output:</h1>
-                        {text}
-                        <hr className='mt-10' />
-                        <h1 className='mt-5 font-bold text-center text-3xl'>Sentiment Score: {sentimentData.score}</h1>
-                        <div className='flex flex-row gap-[20px] justify-center p-5 '>
-                            {
-                                sentimentData.score > 0 ? <div className='flex justify-center items-center relative'>
-                                    <img src='./happy.gif' className='w-28' alt="Positive" />
-                                    <p className='absolute -bottom-5'>Positive</p>
-                                </div> :
-                                    sentimentData.score === 0 ? <div className='flex justify-center items-center relative'>
-                                        <img src='./neutral.gif' className='w-28' alt="Neutral" />
-                                        <p className='absolute -bottom-5'>Neutral</p>
+                        Please wait while we analyze your pdf to provide accurate output, more concise version. This may take a few moments, but we promise it will be worth it!.......
+                    </p>
+                        :
+                        <div id="sentimentData" className='mt-[50px] h-[100vh]'>
+                            <h1 className='text-2xl underline text-center mb-5 font-medium'> Summarized Output:</h1>
+                            {summarize}
+                            <hr className='mt-10' />
+                            <h1 className='mt-5 font-bold text-center text-3xl'>Sentiment Score: {sentimentData.score}</h1>
+                            <div className='flex flex-row gap-[20px] justify-center p-5 '>
+                                {
+                                    sentimentData.score > 0 ? <div className='flex justify-center items-center relative'>
+                                        <img src='./happy.gif' className='w-28' alt="Positive" />
+                                        <p className='absolute -bottom-5'>Positive</p>
                                     </div> :
-                                        sentimentData.score < 0 ? <div className='flex justify-center items-center relative'>
-                                            <img src='./sad.gif' className='w-28' alt="sad" />
-                                            <p className='absolute -bottom-5'>Negative</p>
+                                        sentimentData.score === 0 ? <div className='flex justify-center items-center relative'>
+                                            <img src='./neutral.gif' className='w-28' alt="Neutral" />
+                                            <p className='absolute -bottom-5'>Neutral</p>
                                         </div> :
-                                            <p className='text-red-500'>Something Went Wrong</p>
-                            }
+                                            sentimentData.score < 0 ? <div className='flex justify-center items-center relative'>
+                                                <img src='./sad.gif' className='w-28' alt="sad" />
+                                                <p className='absolute -bottom-5'>Negative</p>
+                                            </div> :
+                                                <p className='text-red-500'>Something Went Wrong</p>
+                                }
+                            </div>
                         </div>
-                    </div>
             }
 
         </div>
